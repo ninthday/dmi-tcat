@@ -1,6 +1,7 @@
 <?php
 require_once './common/config.php';
 require_once './common/functions.php';
+require_once './common/CSV.class.php';
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -27,6 +28,8 @@ require_once './common/functions.php';
 
         <?php
         validate_all_variables();
+        $filename = get_filename_for_export("tweetStats");
+        $csv = new CSV($filename, $outputformat);
 
         $numtweets = $numlinktweets = $numTweetsWithHashtag = $numTweetsWithMentions = $numRetweets = $numReplies = array();
 
@@ -116,7 +119,7 @@ require_once './common/functions.php';
             }
         }
         
-        $content = "Date,Number of tweets,Number of tweets with links,Number of tweets with hashtags,Number of tweets with mentions,Number of retweets,Number of replies\n";
+        $csv->writeheader(array("Date", "Number of tweets", "Number of tweets with links", "Number of tweets with hashtags", "Number of tweets with mentions", "Number of retweets", "Number of replies"));
         foreach ($numtweets as $date => $tweetcount) {
             $linkcount = $hashtagcount = $mentioncount = $retweetcount = $replycount = 0;
             if (isset($numlinktweets[$date]))
@@ -129,11 +132,18 @@ require_once './common/functions.php';
                 $retweetcount = $numretweets[$date];
             if (isset($numReplies[$date]))
                 $replycount = $numReplies[$date];
-            $content .= "$date,$tweetcount,$linkcount,$hashtagcount,$mentioncount,$retweetcount,$replycount\n";
+            $csv->newrow();
+            $csv->addfield($date);
+            $csv->addfield($tweetcount);
+            $csv->addfield($linkcount);
+            $csv->addfield($hashtagcount);
+            $csv->addfield($mentioncount);
+            $csv->addfield($retweetcount);
+            $csv->addfield($replycount);
+            $csv->writerow();
         }
 
-        $filename = get_filename_for_export("tweetStats");
-        file_put_contents($filename,chr(239) . chr(187) . chr(191) . $content);
+        $csv->close();
         echo '<fieldset class="if_parameters">';
 
         echo '<legend>Tweet stats</legend>';

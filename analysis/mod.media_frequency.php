@@ -44,7 +44,7 @@ $minf = isset($_GET['minf']) ? $minf = $_GET['minf'] : 1;
         $debug = '';
         if ($sqlresults) {
             while ($data = mysql_fetch_assoc($sqlresults)) {
-                $url = textToCSV($data["url"]);
+                $url = decodeAndFlatten($data["url"]);
                 $datepart = str_replace(' ', '_', $data["datepart"]);
                 fputs($tempfile, "\"$datepart\" \"$url\"\n");
             }
@@ -58,11 +58,21 @@ $minf = isset($_GET['minf']) ? $minf = $_GET['minf'] : 1;
 
         // write csv results
 
+        // CSV is written by awk here, so we explicitely handle the output format
+
         $filename = get_filename_for_export("mediaFrequency");
         $csv = fopen($filename, "w");
         fputs($csv, chr(239) . chr(187) . chr(191));
-        fputs($csv, "data,media url,frequency\n");
-        system("sort -S 8% $templocation | uniq -c | sort -S 8% -b -k 2,2 -k 1,1nr -k 3,3 | awk '{ if ($1 >= $minf) { print $2 \",\" $3 \",\" $1} }' | sed -e 's/_/ /' >> $filename");
+        if ($outputformat == 'tsv') {
+            fputs($csv, "data\tmedia url\tfrequency\n");
+        } else {
+            fputs($csv, "data,media url,frequency\n");
+        }
+        if ($outputformat == 'tsv') {
+            system("sort -S 8% $templocation | uniq -c | sort -S 8% -b -k 2,2 -k 1,1nr -k 3,3 | awk '{ if ($1 >= $minf) { print $2 \"\\t\" $3 \"\\t\" $1} }' | sed -e 's/_/ /' >> $filename");
+        } else {
+            system("sort -S 8% $templocation | uniq -c | sort -S 8% -b -k 2,2 -k 1,1nr -k 3,3 | awk '{ if ($1 >= $minf) { print $2 \",\" $3 \",\" $1} }' | sed -e 's/_/ /' >> $filename");
+        }
  
         fclose($csv);
         
