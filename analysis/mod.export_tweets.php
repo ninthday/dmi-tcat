@@ -49,10 +49,10 @@ require_once './common/CSV.class.php';
         if (array_search("media", $exportSettings) !== false) {
             if (array_search("urls", $exportSettings) !== false) {
                 // full export of followed urls and media
-                $header .= ",media_id,media_type,media_indice_start,media_indice_end,photo_sizes_width,photo_sizes_height,photo_resize";
+                $header .= ",media_id,media_urls,media_type,media_indice_start,media_indice_end,photo_sizes_width,photo_sizes_height,photo_resize";
             } else {
                 // export non-followed media urls
-                $header .= ",urls,urls_expanded,media_id,media_type,media_indice_start,media_indice_end,photo_sizes_width,photo_sizes_height,photo_resize";
+                $header .= ",urls,urls_expanded,media_id,media_urls,media_type,media_indice_start,media_indice_end,photo_sizes_width,photo_sizes_height,photo_resize";
             }
         }
         if (array_search("mentions", $exportSettings) !== false)
@@ -89,7 +89,7 @@ require_once './common/CSV.class.php';
                 }
                 if (array_search("urls", $exportSettings) !== false || 
                     array_search("media", $exportSettings) !== false) {
-                    $urls = $expanded = $followed = $domain = $error = $media = $media_ids = $media_type = $photo_width = $photo_height = $photo_resize = $indice_start = $indice_end = array();
+                    $urls = $expanded = $followed = $domain = $error = $media = $media_ids = $media_urls = $media_type = $photo_width = $photo_height = $photo_resize = $indice_start = $indice_end = array();
                     // lookup urls
                     if (array_search("urls", $exportSettings) !== false) {
                         $sql2 = "SELECT * FROM " . $esc['mysql']['dataset'] . "_urls WHERE tweet_id = " . $data['id'];
@@ -101,13 +101,6 @@ require_once './common/CSV.class.php';
                                 $followed[] = $res2['url_followed'];
                                 $domain[] = $res2['domain'];
                                 $error[] = $res2['error_code'];
-                                $media_ids[] = '';
-                                $media_type[] = '';
-                                $photo_width[] = '';
-                                $photo_height[] = '';
-                                $photo_resize[] = '';
-                                $indice_start[] = '';
-                                $indice_end[] = '';
                             }
                         }
                     }
@@ -123,6 +116,7 @@ require_once './common/CSV.class.php';
                                 $domain[] = '';
                                 $error[] = '';
                                 $media_ids[] = $res3['id'];
+                                $media_urls[] = $res3['media_url_https'];
                                 $media_type[] = $res3['media_type'];
                                 $photo_width[] = $res3['photo_size_width'];
                                 $photo_height[] = $res3['photo_size_height'];
@@ -141,6 +135,7 @@ require_once './common/CSV.class.php';
                         $csv->addfield(implode("; ", $domain));
                         $csv->addfield(implode("; ", $error));
                         $csv->addfield(implode("; ", $media_ids));
+                        $csv->addfield(implode("; ", $media_urls));
                         $csv->addfield(implode("; ", $media_type));
                         $csv->addfield(implode("; ", $indice_start));
                         $csv->addfield(implode("; ", $indice_end));
@@ -159,6 +154,7 @@ require_once './common/CSV.class.php';
                         $csv->addfield(implode("; ", $urls));
                         $csv->addfield(implode("; ", $expanded));
                         $csv->addfield(implode("; ", $media_ids));
+                        $csv->addfield(implode("; ", $media_urls));
                         $csv->addfield(implode("; ", $media_type));
                         $csv->addfield(implode("; ", $indice_start));
                         $csv->addfield(implode("; ", $indice_end));
