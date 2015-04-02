@@ -30,8 +30,6 @@ require_once './common/CSV.class.php';
         validate_all_variables();
 
         $filename = get_filename_for_export("sourceStats");
-        $filename_locations = get_filename_for_export("locations");
-        $filename_languages = get_filename_for_export("languages");
 
         $csv = new CSV($filename, $outputformat);
 
