@@ -43,7 +43,7 @@ $minf = isset($_GET['minf']) ? $minf = $_GET['minf'] : 1;
         $debug = '';
         if ($sqlresults) {
             while ($data = mysql_fetch_assoc($sqlresults)) {
-                $text = decodeAndFlatten($data["text"]);
+                $text = $data["text"];
                 preg_match_all('/(https?:\/\/[^\s]+)|([\p{L}][\p{L}]+)/u', $text, $matches, PREG_PATTERN_ORDER);
                 foreach ($matches[0] as $word) {
                     if (preg_match('/(https?:\/\/)/u', $word))
