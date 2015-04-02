@@ -31,7 +31,7 @@ require_once './common/CSV.class.php';
         $filename = get_filename_for_export("tweetStats");
         $csv = new CSV($filename, $outputformat);
 
-        $numtweets = $numlinktweets = $numTweetsWithHashtag = $numTweetsWithMentions = $numRetweets = $numReplies = array();
+        $numtweets = $numlinktweets = $numTweetsWithHashtag = $numTweetsWithMentions = $numTweetsWithMedia = $numRetweets = $numReplies = array();
 
         // tweets in subset
         $sql = "SELECT count(distinct(t.id)) as count, ";
@@ -89,6 +89,21 @@ require_once './common/CSV.class.php';
             }
         }
 
+        // number of tweets with media uploads
+        $sql = "SELECT count(distinct(m.tweet_id)) as count, ";
+        $sql .= sqlInterval();
+        $sql .= " FROM " . $esc['mysql']['dataset'] . "_media m, " . $esc['mysql']['dataset'] . "_tweets t ";
+        $sql .= sqlSubset();
+        $sql .= " AND t.id = m.tweet_id ";
+        $sql .= " GROUP BY datepart ORDER BY datepart ASC";
+        //print $sql . "<br>";
+        $sqlresults = mysql_query($sql);
+        if ($sqlresults && mysql_num_rows($sqlresults) > 0) {
+            while ($data = mysql_fetch_assoc($sqlresults)) {
+                $numTweetsWithMedia[$data['datepart']] = $data["count"];
+            }
+        }
+
         // number of retweets 
         $sql = "SELECT count(distinct(id)) as count, ";
         $sql .= sqlInterval();
@@ -119,7 +134,7 @@ require_once './common/CSV.class.php';
             }
         }
         
-        $csv->writeheader(array("Date", "Number of tweets", "Number of tweets with links", "Number of tweets with hashtags", "Number of tweets with mentions", "Number of retweets", "Number of replies"));
+        $csv->writeheader(array("Date", "Number of tweets", "Number of tweets with links", "Number of tweets with hashtags", "Number of tweets with mentions", "Number of tweets with media uploads", "Number of retweets", "Number of replies"));
         foreach ($numtweets as $date => $tweetcount) {
             $linkcount = $hashtagcount = $mentioncount = $retweetcount = $replycount = 0;
             if (isset($numlinktweets[$date]))
@@ -128,6 +143,8 @@ require_once './common/CSV.class.php';
                 $hashtagcount = $numTweetsWithHashtag[$date];
             if (isset($numTweetsWithMentions[$date]))
                 $mentioncount = $numTweetsWithMentions[$date];
+            if (isset($numTweetsWithMedia[$date]))
+                $mediacount = $numTweetsWithMedia[$date];
             if (isset($numretweets[$date]))
                 $retweetcount = $numretweets[$date];
             if (isset($numReplies[$date]))
@@ -138,6 +155,7 @@ require_once './common/CSV.class.php';
             $csv->addfield($linkcount);
             $csv->addfield($hashtagcount);
             $csv->addfield($mentioncount);
+            $csv->addfield($mediacount);
             $csv->addfield($retweetcount);
             $csv->addfield($replycount);
             $csv->writerow();
