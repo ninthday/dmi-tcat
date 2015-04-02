@@ -15,7 +15,7 @@ class CSV {
     }
 
     private function textToTSV($text) {
-        return preg_replace("/[\r\n]/", " ", html_entity_decode($text));
+        return preg_replace("/[\r\t\n]/", " ", html_entity_decode($text));
     }
 
     public function __construct($filename, $outputformat = 'csv') {
