@@ -41,10 +41,9 @@ $minf = isset($_GET['minf']) ? $minf = $_GET['minf'] : 1;
         //$sql .= " GROUP BY datepart ORDER BY datepart ASC";
         $sql .= " ORDER BY datepart ASC";
         $sqlresults = mysql_query($sql);
-        $debug = '';
         if ($sqlresults) {
             while ($data = mysql_fetch_assoc($sqlresults)) {
-                $text = decodeAndFlatten($data["text"]);
+                $text = $data["text"];
                 $datepart = str_replace(' ', '_', $data["datepart"]);
                 preg_match_all('/(https?:\/\/[^\s]+)|([@#\p{L}][\p{L}]+)/u', $text, $matches, PREG_PATTERN_ORDER);
                 foreach ($matches[0] as $word) {
